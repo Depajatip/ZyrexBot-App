@@ -235,16 +235,7 @@ module.exports = async (fell, m) => {
 
 
 
-        //fungsi jarak
-        async function jarak(dari, ke) {
-            var html = (await axios(`https://www.google.com/search?q=${encodeURIComponent('jarak ' + dari + ' ke ' + ke)}&hl=id`)).data
-            var $ = cheerio.load(html), obj = {}
-            var img = html.split("var s=\'")?.[1]?.split("\'")?.[0]
-            obj.img = /^data:.?\/.?;base64,/i.test(img) ? Buffer.from(img.split`,`[1], 'base64') : ''
-            obj.desc = $('div.BNeawe.deIvCb.AP7Wnd').text()?.trim()
-            return obj
-        }
-        //sampesini
+
         async function getRandom(ext) {
             return `${Math.floor(Math.random() * 10000)}${ext}`;
         }
@@ -654,7 +645,7 @@ module.exports = async (fell, m) => {
                     };
 
                     let menuText = `┏––––––━━━━•\n`;
-                    menuText += `│Wasupp @${m.sender.split("@")[0]} 👋!!\n`;
+                    menuText += `│ Welcome @${m.sender.split("@")[0]} 👋!!\n`;
                     menuText += `┣━━━━━━━┅┅┅\n`;
                     menuText += `├[ INFO ]—\n`;
                     menuText += `│ Bot Name : ${global.botname}\n`;
@@ -664,54 +655,29 @@ module.exports = async (fell, m) => {
                     menuText += `   
                          
       ━━––• TEST
-      • .runtime (cek sudah berapa lama bot aktif)
+      • .runtime (cek waktu bot aktif)
       • .tes (cek apakah bot aktif)
-      • .menu (list menu)
+      • .menu (untuk menampilkan list menu)
      ┗––––––━━━
      
       ━━––• FITUR BOT
       • .s (ubah gambar/vid jadi sticker)
-      • .jomok (masih bug)
-      • .pin (untuk show gambar dari pinterset)
       • .tt (download vid tt tanpa wm)
       • .spotify (link to audio)
       • .tts (text to audio google)
       • .igstalker (stalking ig orang)
       • .ffstalker (cari username dari id)
-      • .setexif (merubah author sticker admin  only)
+      • .setexif
       • .swm (merubah author sticker)
-      • .jarak (menampilkan jarak)
       • .toimg (ubah sticker ke foto)
       • .spam-pairing (spam kode auth)
       • .everyone (tag semua member)
-      • .etag (custom tag)
       • .ht (hidetag)
       • .sendht (send hidetag dari gc)
       • .sendcsht (ht custom id)
-      • .tebak lagu 
-      • .kuis math 
-      • .tebak gambar 
-      • .tebak kata
-      • .tebak kalimat 
-      • .tebak lirik 
-      • .tebak tebakan 
-      • .tebak bendera 
-      • .tebak bendera2 
-      • .tebak kabupaten 
-      • .tebak kimia 
-      • .tebak asahotak 
-      • .tebak siapakahaku 
-      • .tebak susunkata 
-      • .tebak tekateki 
-      • .tebak jkt48
+      • .tebak (game tebak tebakan)
      ┗––––––━━━
 
-      ━━––• OPSIONAL
-      • .sisor
-      • .wakiman
-      • .p
-    ┗––––––━━━
-    
        Credits.
        - Depa
        - xZiyy
@@ -1023,21 +989,6 @@ module.exports = async (fell, m) => {
             }
                 break
             //sampesini
-            //jarak
-            case "jarak": {
-                var [fromo, to] = text.split`|`
-                if (!(fromo && to)) return reply(`Ex: ${prefix + command} jakarta|bandung`)
-                var data = await jarak(fromo, to)
-                if (data.img) return fell.sendMessage(m?.chat, {
-                    image: data.img,
-                    caption: data.desc
-                }, {
-                    quoted: m
-                })
-                else reply(data.desc)
-            }
-                break
-            //sampesini
             //stalk id ep ep
             case 'ffstalker': {
                 if (!text) return m.reply('mana idnya?')
@@ -1093,7 +1044,7 @@ module.exports = async (fell, m) => {
                     return tebakgambar[from] || tebakkata[from] || tebakkalimat[from] || tebaklirik[from] ||
                         tebaktebakan[from] || tebakbendera[from] || tebakbendera2[from] || tebakkabupaten[from] ||
                         tebakkimia[from] || tebakasahotak[from] || tebaksiapakahaku[from] || tebaksusunkata[from] ||
-                        tebaktekateki[from] || tebakjkt48[from];
+                        tebaktekateki[from];
                 }
                 if (isGameActive()) {
                     return reply("Masih Ada Sesi Permainan Yang Belum Diselesaikan!");
@@ -1295,79 +1246,10 @@ module.exports = async (fell, m) => {
                     } else {
                         reply("Gagal mengambil data dari API.");
                     }
-                } else reply(`- GAME TEBAK -\n\n.tebak kata\n.tebak tebakan\n.tebak bendera\n.tebak kalimat\n.tebak lirik\n.tebak tekateki\n.tebak siapakahaku\n.tebak asahotak\n.tebak susunkata\n.tebak kimia\n.tebak kabupaten\n.tebak gambar\n.tebak bendera2\n.tebak jkt48`)
+                } else reply(`- GAME TEBAK -\n\n.tebak kata\n.tebak tebakan\n.tebak bendera\n.tebak kalimat\n.tebak lirik\n.tebak tekateki\n.tebak siapakahaku\n.tebak asahotak\n.tebak susunkata\n.tebak kimia\n.tebak kabupaten\n.tebak gambar\n.tebak bendera2`)
             }
                 break
 
-            //pin 
-            case 'pin': {
-                if (!text) return m.reply(`Gunakan dengan cara ${command} *text*\n\n_Contoh_\n\n${command} kontol berurat`);
-
-                await fell.sendMessage(from, {
-                    react: {
-                        text: "⏱️",
-                        key: m.key
-                    }
-                });
-
-                try {
-                    // Mengambil data dari API Pinterest yang baru
-                    let { data } = await axios.get(`https://api.ryzendesu.vip/api/search/pinterest?query=${text}`);
-
-                    // Cek apakah hasil yang diterima adalah array dan ada datanya
-                    let images = data;
-                    if (!images || !images.length) {
-                        m.reply("No images found from Pinterest. Please try again later.");
-                        return;
-                    }
-
-                    // Fungsi untuk mengacak array menggunakan Math.random() dan Math.floor()
-                    function shuffle(array) {
-                        for (let i = array.length - 1; i > 0; i--) {
-                            const j = Math.floor(Math.random() * (i + 1));
-                            [array[i], array[j]] = [array[j], array[i]];
-                        }
-                        return array;
-                    }
-
-                    const shuffledImages = shuffle(images);
-                    const limitedImages = shuffledImages.slice(0, 5); // mengambil acakan dari hasil 5 gambar
-
-                    // Mengirim gambar dalam format carousel
-                    await generateCarouselMessage(limitedImages, from);
-
-                } catch (error) {
-                    console.error("Error fetching Pinterest images:", error);
-                    m.reply("Maaf, terjadi kesalahan dalam mengambil gambar. Silakan coba lagi nanti.");
-                }
-            }
-                break;
-            //sampesini
-
-            //sjomok
-            case 'jomok': {
-                query = 'jomok sticker'
-                // Mengambil data dari API Pinterest yang baru
-                let { data } = await axios.get(`https://api.ryzendesu.vip/api/search/pinterest?query=${query}`);
-
-                // Cek apakah hasil yang diterima adalah array dan ada datanya
-                let images = data;
-                if (!images || !images.length) {
-                    reply("No images found from Pinterest. Please try again later.");
-                    return;
-                }
-
-                for (let i = 0; i < 2; i++) {
-                    let result = images[Math.floor(Math.random() * images.length)]; // Pilih gambar acak
-
-                    fell.sendImageAsSticker(from, result, m, {
-                        packname: global.packname,
-                        author: global.author
-                    })
-                }
-            }
-                break
-            //sampesini
 
             default:
                 if (budy.startsWith('=>')) {
