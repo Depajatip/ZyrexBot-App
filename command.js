@@ -197,6 +197,66 @@ module.exports = async (fell, m) => {
 
             return await fell.sendMessage(jid, { image: buffer, caption: caption, ...options }, { quoted });
         };
+        function makeid(length) {
+}
+
+
+
+    try {
+      let isNumber = x => typeof x === 'number' && !isNaN(x)
+      let user = global.db.data.users[m?.sender]
+      if (typeof user !== 'object') global.db.data.users[m?.sender] = {}
+      if (user) {
+        if (!isNumber(user.afkTime)) user.afkTime = -1
+        if (!('afkReason' in user)) user.afkReason = ''
+      }
+      else global.db.data.users[m?.sender] = {
+        afkTime: -1,
+        afkReason: '',
+        
+      }
+      // chats
+      let chats = global.db.data.chats[m?.chat]
+      if (typeof chats !== 'object') global.db.data.chats[m?.chat] = {}
+      if (chats) {
+        if (!('welcome' in chats)) chats.welcome = false
+        if (!("onlyadmin" in chats)) chats.onlyadmin = false
+      }
+      else global.db.data.chats[m.chat] = {
+        welcome: false,
+        onlyadmin: false,
+      }
+      
+      let setting = global.db.data.settings[botNumber]
+      if (typeof setting !== 'object') global.db.data.settings[botNumber] = {}
+      if (setting) {
+      }
+      else global.db.data.settings[botNumber] = {
+      }
+      
+      
+    }
+    catch (err) {}
+
+
+        //memberikan function
+        fetchJson = async (url, options) => {
+            try {
+                options ? options : {};
+                const res = await axios({
+                    method: "GET",
+                    url: url,
+                    headers: {
+                        "User-Agent":
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36",
+                    },
+                    ...options,
+                });
+                return res.data;
+            } catch (err) {
+                return err;
+            }
+        };
 
 
 
@@ -656,18 +716,23 @@ module.exports = async (fell, m) => {
                          
       ━━––• TEST
       • .runtime (cek waktu bot aktif)
+      • .ping (cek ping bot)
       • .tes (cek apakah bot aktif)
       • .menu (untuk menampilkan list menu)
      ┗––––––━━━
      
       ━━––• FITUR BOT
       • .s (ubah gambar/vid jadi sticker)
+      • .del (menghapus pesan yang direplay)
       • .tt (download vid tt tanpa wm)
       • .spotify (link to audio)
       • .tts (text to audio google)
       • .igstalker (stalking ig orang)
       • .ffstalker (cari username dari id)
-      • .setexif
+      • .sbrat (membuat sticker brat)
+      • .sbratvid (membuat sticker video brat)
+      • .hitamkan (menghitamkan wajah)
+      • .tourl (membuat url image)
       • .swm (merubah author sticker)
       • .toimg (ubah sticker ke foto)
       • .spam-pairing (spam kode auth)
@@ -712,12 +777,62 @@ module.exports = async (fell, m) => {
             }
                 break
             //ht
+            //ping
+            case 'ping':{
+            const speed = require('performance-now');
+            const timestampe = speed(); 
+            const latensie = speed() - timestampe;
+                        m.reply(`
+            ▪️**Latency**: ${latensie.toFixed(4)}ms
+            ▪️**Uptime**: ${runtime(process.uptime())}
+            `)
+                        }
+            break
+            //
             case 'ht': case 'hidetag': {
                 if (!isAdmins && !isCreator && !isAdmins) return reply(acn.admin)
                 if (!m.isGroup) return reply(acn.group)
                 fell.sendMessage(m.chat, { text: q ? q : '', mentions: participants.map(a => a.id) }, { quoted: m })
             }
                 break
+            //deletee peesan
+            case 'del':
+            if (!m.isGroup) return reply(global.mess.group);
+            if (!isAdmins && !isCreator) return reply(global.mess.admin);
+            if (!m.quoted) return reply('Reply pesan yang ingin dihapus!')
+            fell.sendMessage(from, {
+            delete: {
+                remoteJid: from,
+                id: m.quoted.id,
+                fromMe: m.quoted.fromMe,
+                participant: m.quoted.sender
+            }
+            })
+            break
+            //sampe sini
+
+            case 'sbrat': {
+                        (async () => {
+                            if (!text) return m.reply('Ketikkan teks setelah perintah.');
+                            try {
+                                const imageUrl = `https://aqul-brat.hf.space/?text=${encodeURIComponent(text.trim())}`;
+                                
+                                // Mengambil gambar dari URL
+                                const response = await axios.get(imageUrl, {
+                                    responseType: 'arraybuffer'
+                                });
+                                
+                                fell.sendImageAsSticker(m?.chat, response.data, m, {
+                                    packname: global.packname,
+                                    author: global.author
+                                });
+                            } catch (error) {
+                                console.error(`Terjadi kesalahan: ${error}`);
+                                return m.reply('Terjadi kesalahan, harap lapor owner.');
+                            }
+                        })();
+                    }
+                    break;
 
             //send ht 
             case 'sendht': {
@@ -728,59 +843,10 @@ module.exports = async (fell, m) => {
                 fell.sendMessage(idgc, { text: q ? q : '', mentions: participants.map(a => a.id) })
             }
                 break
-            //bratt
-            case 'stickerbrat':
-            case 'sbrat': {
-                (async () => {
-                    if (!text) return m.reply('Ketikkan teks setelah perintah.');
-                    try {
-                        const imageUrl = `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(text.trim())}`;
 
-                        // Mengambil gambar dari URL
-                        const response = await axios.get(imageUrl, {
-                            responseType: 'arraybuffer'
-                        });
-
-                        fell.sendImageAsSticker(m?.chat, response.data, m, {
-                            packname: global.packname,
-                            author: global.author
-                        });
-                    } catch (error) {
-                        console.error(`Terjadi kesalahan: ${error}`);
-                        return m.reply('Terjadi kesalahan, harap lapor owner.');
-                    }
-                })();
-            }
-                break;
-
-            case 'brat': {
-                (async () => {
-                    if (!text) return m.reply('Ketikkan teks setelah perintah.');
-                    try {
-                        const imageUrl = `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(text.trim())}`;
-
-                        // Mengambil gambar dari URL
-                        const response = await axios.get(imageUrl, {
-                            responseType: 'arraybuffer'
-                        });
-
-                        // Mengirim gambar sebagai pesan
-                        fell.sendImage(m.chat, response.data, "", m);
-
-                    } catch (error) {
-                        console.error(`Terjadi kesalahan: ${error}`);
-                        return m.reply('Terjadi kesalahan, harap lapor owner.');
-                    }
-                })();
-            }
-                break;
-
-
-
-            //spam pairing
             case 'spam-pairing': {
                 (async () => {
-                    if (!isCreator) return reply('owner doang bego');
+                    if (!isCreator) return reply('owner only');
                     if (!text) return reply(`*Example:* ${prefix + command} +628xxxxxx|150`);
 
                     let [peenis, pepekk] = text.includes('|') ? text.split("|") : [text, "200"];
@@ -802,58 +868,198 @@ module.exports = async (fell, m) => {
             }
                 break;
 
-            //spotify download
-            case 'spotify': {
-                if (!text) return m.reply(`ndi link e`)
-                fell.sendMessage(from, {
-                    react: {
-                        text: "⏱",
-                        key: m.key,
-                    }
-                })
-                try {
-                    const response = await fetch(`https://api.yanzbotz.live/api/downloader/spotify?url=${text}&apiKey=yanzdev`);
-                    if (!response.ok) {
-                        console.log('Error searching for song:', response.statusText)
-                        return reply('Error searching for song')
-                    }
-                    const data = await response.json()
-                    if (!data.status) {
-                        return reply('Error fetching song data')
-                    }
+            // //spotify download
+            // case 'spotify': {
+            //     if (!text) return m.reply(`ndi link e`)
+            //     fell.sendMessage(from, {
+            //         react: {
+            //             text: "⏱",
+            //             key: m.key,
+            //         }
+            //     })
+            //     try {
+            //         const response = await fetch(`https://api.yanzbotz.live/api/downloader/spotify?url=${text}&apiKey=yanzdev`);
+            //         if (!response.ok) {
+            //             console.log('Error searching for song:', response.statusText)
+            //             return reply('Error searching for song')
+            //         }
+            //         const data = await response.json()
+            //         if (!data.status) {
+            //             return reply('Error fetching song data')
+            //         }
 
-                    const coverimage = data.result.cover
-                    const name = data.result.title
-                    const audioUrl = data.result.music
+            //         const coverimage = data.result.cover
+            //         const name = data.result.title
+            //         const audioUrl = data.result.music
 
-                    let doc = {
-                        audio: {
-                            url: audioUrl
-                        },
-                        mimetype: 'audio/mpeg',
-                        waveform: [100, 0, 100, 0, 100, 0, 100],
-                        fileName: "Spotify Downloader",
-                        contextInfo: {
-                            mentionedJid: [m.sender],
-                            externalAdReply: {
-                                title: `Playing To ${name}`,
-                                body: 'click dsini untuk download cover',
-                                thumbnailUrl: coverimage,
-                                sourceUrl: coverimage,
-                                mediaType: 1,
-                                renderLargerThumbnail: true
-                            }
-                        }
-                    }
-                    await fell.sendMessage(from, doc, {
-                        quoted: m
-                    })
-                } catch (error) {
-                    console.error('Error fetching Spotify data:', error)
-                    return m.reply('Error kak, Silahkan coba lagi nanti')
-                }
-            }
-                break
+            //         let doc = {
+            //             audio: {
+            //                 url: audioUrl
+            //             },
+            //             mimetype: 'audio/mpeg',
+            //             waveform: [100, 0, 100, 0, 100, 0, 100],
+            //             fileName: "Spotify Downloader",
+            //             contextInfo: {
+            //                 mentionedJid: [m.sender],
+            //                 externalAdReply: {
+            //                     title: `Playing To ${name}`,
+            //                     body: 'click dsini untuk download cover',
+            //                     thumbnailUrl: coverimage,
+            //                     sourceUrl: coverimage,
+            //                     mediaType: 1,
+            //                     renderLargerThumbnail: true
+            //                 }
+            //             }
+            //         }
+            //         await fell.sendMessage(from, doc, {
+            //             quoted: m
+            //         })
+            //     } catch (error) {
+            //         console.error('Error fetching Spotify data:', error)
+            //         return m.reply('Error kak, Silahkan coba lagi nanti')
+            //     }
+            // }
+            //     break
+            case 'hitamkan': {
+  if (/image/.test(mime) || quoted?.mimetype?.includes('image')) {
+    m.reply('_Tunggu sebentar, sedang memproses..._');
+
+    async function prosesHitamkan() {
+      try {
+        const media = await quoted.download();
+        const data = JSON.stringify({
+          imageData: Buffer.from(media).toString('base64'),
+          filter: 'hitam'
+        });
+
+        const res = await axios.post('https://negro.consulting/api/process-image', data, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (res.data && res.data.status === 'success') {
+          const hasilBuffer = Buffer.from(res.data.processedImageUrl.split(',')[1], 'base64');
+          fell.sendMessage(m.chat, {
+            image: hasilBuffer,
+            caption: 'Sudah dihitamkan'
+          }, { quoted: m });
+        } else {
+          m.reply('Gagal memproses gambar.');
+        }
+      } catch (err) {
+        m.reply('Terjadi kesalahan saat memproses gambar.');
+        console.error(err);
+      }
+    }
+
+    prosesHitamkan();
+  } else {
+    m.reply('Kirimkan gambar atau reply gambar dengan caption *hitamkan*');
+  }
+}
+break;
+case 'tourl': {
+  try {
+  if (!m.quoted) return reply(`Send/Reply Media With Captions ${prefix + command}`)
+
+    const filename = makeid(5)
+    const media = await fell.downloadAndSaveMediaMessage(quoted, filename)
+
+    exec(`curl -F "reqtype=fileupload" -F "userhash=" -F "fileToUpload=@${media}" https://catbox.moe/user/api.php`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(error);
+        return reply("Gagal upload ke Catbox 😔");
+      }
+
+      reply(stdout.trim());
+
+      fs.unlink(media, (err) => {
+        if (err) console.error('Gagal menghapus file:', err);
+        else console.log(`File ${media} berhasil dihapus.`);
+      });
+    });
+
+  } catch (error) {
+    console.log(error);
+    return reply("Error...");
+  }
+}
+break;
+
+            case 'sbratvid': {
+        const ongoingCommands = new Set(); 
+        fell.sendMessage(m.chat, { react: { text: '🕒', key: m.key } });
+        if (ongoingCommands.has(m.sender)) {
+          return m.reply('Maaf, masih ada perintah yang sedang berjalan. Tunggu sampai selesai.');
+        }
+
+        // Tandai pengguna sebagai sedang menjalankan perintah
+        ongoingCommands.add(m.sender);
+
+        try {
+          if (!text) return reply(`Contoh: ${prefix + command} hai`);
+          if (text.length > 250) return reply(`Karakter terbatas, max 250!`);
+
+         const {
+            execSync
+          } = require('child_process');
+          const words = text.split(" ");
+          const tempDir = path.resolve('./src/temp');
+          if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+          const framePaths = [];
+
+          for (let i = 0; i < words.length; i++) {
+            const currentText = words.slice(0, i + 1).join(" ");
+
+            const res = await axios.get(
+              `https://aqul-brat.hf.space/?text=${encodeURIComponent(currentText)}`, {
+                responseType: "arraybuffer"
+              }
+            ).catch((e) => e.response);
+
+            const framePath = path.join(tempDir, `frame${i}.mp4`);
+            fs.writeFileSync(framePath, res.data);
+            framePaths.push(framePath);
+          }
+
+          const fileListPath = path.join(tempDir, "filelist.txt");
+          let fileListContent = "";
+
+          for (let i = 0; i < framePaths.length; i++) {
+            fileListContent += `file '${framePaths[i]}'\n`;
+            fileListContent += `duration 0.7\n`;
+          }
+
+          fileListContent += `file '${framePaths[framePaths.length - 1]}'\n`;
+          fileListContent += `duration 2\n`;
+
+          fs.writeFileSync(fileListPath, fileListContent);
+          const outputVideoPath = path.join(tempDir, "output.mp4");
+          execSync(
+            `ffmpeg -y -f concat -safe 0 -i ${fileListPath} -vf "fps=30" -c:v libx264 -preset ultrafast -pix_fmt yuv420p ${outputVideoPath}`
+          );
+
+          await fell.sendImageAsSticker(m.chat, outputVideoPath, m, {
+            packname: `${m.pushName}\n\n\n\n\n\n\n\n${global.packname}`,
+            author: global.author,
+          });
+          framePaths.forEach((frame) => {
+            if (fs.existsSync(frame)) fs.unlinkSync(frame);
+          });
+          if (fs.existsSync(fileListPath)) fs.unlinkSync(fileListPath);
+          if (fs.existsSync(outputVideoPath)) fs.unlinkSync(outputVideoPath);
+        }
+        catch (e) {
+          console.error(e);
+          reply('Terjadi kesalahan');
+        }
+        finally {
+          ongoingCommands.delete(m.sender); // Hapus pengguna dari daftar proses berjalan
+        }
+        break;
+    }
+
             //ttdownload
             case 'tt': {
                 if (args.length == 0) return m.reply(`ndi link e`)
@@ -1289,7 +1495,6 @@ module.exports = async (fell, m) => {
                         if (stdout) return m.reply(stdout)
                     })
                 }
-                break;
                 break;
         }
     } catch (err) {
